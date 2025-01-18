@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CyberSearch</title>
     <style>
-        /* Basic Restore */
+        /* Basic Reset */
         * {
             margin: 0;
             padding: 0;
@@ -177,6 +177,9 @@
             `;
             tabBar.insertBefore(tabElement, newTabButton);
 
+            // Adjust tab positions
+            adjustTabPositions();
+
             const tabIframe = document.createElement('div');
             tabIframe.dataset.tabId = tabId;
             tabIframe.classList.add('active');
@@ -203,6 +206,16 @@
             });
         }
 
+        function adjustTabPositions() {
+            const tabElements = tabBar.querySelectorAll('.tab');
+            let currentX = 0;
+
+            tabElements.forEach(tab => {
+                tab.style.marginLeft = `${currentX}px`;
+                currentX += tab.offsetWidth + 5; // Add a small gap between tabs
+            });
+        }
+
         function activateTab(tabId) {
             activeTabId = tabId;
             document.querySelectorAll('.tab').forEach(tab =>
@@ -212,7 +225,7 @@
                 (tabContent.style.display = tabContent.dataset.tabId === tabId ? 'flex' : 'none')
             );
 
-            // Scroll tab into view updatw
+            // Scroll tab into view
             document.querySelector(`.tab[data-tab-id="${tabId}"]`)?.scrollIntoView({ behavior: 'smooth', inline: 'center' });
         }
 
@@ -225,6 +238,9 @@
             } else {
                 activeTabId = null;
             }
+
+            // Adjust tab positions
+            adjustTabPositions();
         }
 
         newTabButton.addEventListener('click', () => createTab());
