@@ -177,8 +177,7 @@
             `;
             tabBar.insertBefore(tabElement, newTabButton);
 
-            // Adjust tab positions
-            adjustTabPositions();
+            adjustTabPosition(tabElement);
 
             const tabIframe = document.createElement('div');
             tabIframe.dataset.tabId = tabId;
@@ -206,14 +205,15 @@
             });
         }
 
-        function adjustTabPositions() {
-            const tabElements = tabBar.querySelectorAll('.tab');
+        function adjustTabPosition(newTab) {
             let currentX = 0;
-
+            const tabElements = tabBar.querySelectorAll('.tab');
             tabElements.forEach(tab => {
-                tab.style.marginLeft = `${currentX}px`;
-                currentX += tab.offsetWidth + 5; // Add a small gap between tabs
+                if (tab !== newTab) {
+                    currentX += tab.offsetWidth + 5;
+                }
             });
+            newTab.style.marginLeft = `${currentX}px`;
         }
 
         function activateTab(tabId) {
@@ -238,9 +238,6 @@
             } else {
                 activeTabId = null;
             }
-
-            // Adjust tab positions
-            adjustTabPositions();
         }
 
         newTabButton.addEventListener('click', () => createTab());
