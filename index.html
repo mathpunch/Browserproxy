@@ -17,35 +17,30 @@
             display: flex;
             flex-direction: column;
             font-family: Arial, sans-serif;
-            background-color: #2c2c2c; /* Dark grey background */
-            color: #e0e0e0; /* Light text for contrast */
+            background-color: #2c2c2c;
+            color: #e0e0e0;
         }
 
         /* Tab Bar */
         #tab-bar {
             display: flex;
             align-items: center;
-            overflow-x: auto; /* Allows horizontal scrolling if tabs exceed space */
+            overflow-x: auto;
             background-color: #3a3a3a;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
             padding: 5px;
-            gap: 5px; /* Adds consistent spacing between tabs */
+            gap: 5px;
         }
 
         .tab {
-            display: flex;
-            align-items: center;
-            justify-content: center;
             background-color: #4a4a4a;
             padding: 5px 15px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 0.9rem;
             color: #e0e0e0;
-            min-width: 100px;
-            max-width: 200px;
             text-align: center;
-            white-space: nowrap; /* Prevents text wrapping inside tabs */
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
         }
 
         .tab.active {
@@ -65,30 +60,27 @@
             padding: 5px 15px;
             cursor: pointer;
             color: #4caf50;
-            font-weight: bold;
         }
 
         /* Tab Content */
         #tab-content {
-            flex: 1; /* Makes it fill all remaining vertical space */
+            flex: 1;
+            background-color: #3a3a3a;
             display: flex;
             flex-direction: column;
-            background-color: #3a3a3a;
-            overflow: hidden;
         }
 
         [data-tab-id] {
             display: none;
-            flex: 1; /* Ensures child containers fill vertical space */
-            flex-direction: column;
+            flex: 1;
         }
 
         [data-tab-id].active {
             display: flex;
+            flex-direction: column;
         }
 
         #search-bar {
-            display: flex;
             padding: 10px;
             background-color: #4a4a4a;
             border-bottom: 1px solid #555;
@@ -113,18 +105,16 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 1rem;
         }
 
         iframe {
-            flex: 1; /* Takes up the remaining vertical space */
-            width: 100%; /* Full width */
+            flex: 1;
+            width: 100%;
             border: none;
         }
     </style>
 </head>
 <body>
-
     <!-- Tab Bar -->
     <div id="tab-bar">
         <div id="new-tab">+</div>
@@ -140,6 +130,9 @@
         let tabs = [];
         let activeTabId = null;
 
+        let enableParticles = true;
+        let enableDarkMode = true;
+
         function isValidUrl(string) {
             try {
                 new URL(string);
@@ -150,18 +143,39 @@
         }
 
         function createProxyUrl(input) {
-            let url;
             if (isValidUrl(input)) {
                 if (!input.startsWith('http://') && !input.startsWith('https://')) {
-                    url = 'https://' + input;
-                } else {
-                    url = input;
+                    input = 'https://' + input;
                 }
-            } else {
-                const searchQuery = encodeURIComponent(input);
-                url = `https://www.bing.com/search?q=${searchQuery}`;
+                return input;
             }
-            return `https://camouflageisthebest.jakesthoughts.xyz/static/iframe.html#${url}`;
+            return `https://www.bing.com/search?q=${encodeURIComponent(input)}`;
+        }
+
+        function createSettingsPage(tabIframe) {
+            tabIframe.innerHTML = `
+                <div style="padding: 20px;">
+                    <h2>Settings</h2>
+                    <label>
+                        <input type="checkbox" id="toggle-particles" ${enableParticles ? 'checked' : ''}>
+                        Enable particle effects on new tab page
+                    </label><br><br>
+                    <label>
+                        <input type="checkbox" id="toggle-dark-mode" ${enableDarkMode ? 'checked' : ''}>
+                        Enable dark mode
+                    </label>
+                </div>
+            `;
+            tabIframe.querySelector('#toggle-particles').addEventListener('change', (e) => {
+                enableParticles = e.target.checked;
+                alert(`Particles are now ${enableParticles ? 'enabled' : 'disabled'}.`);
+            });
+            tabIframe.querySelector('#toggle-dark-mode').addEventListener('change', (e) => {
+                enableDarkMode = e.target.checked;
+                document.body.style.backgroundColor = enableDarkMode ? '#2c2c2c' : '#ffffff';
+                document.body.style.color = enableDarkMode ? '#e0e0e0' : '#000000';
+                alert(`Dark mode is now ${enableDarkMode ? 'enabled' : 'disabled'}.`);
+            });
         }
 
         function createTab(defaultUrl = 'https://cybershadesearch.vercel.app') {
@@ -171,20 +185,15 @@
             const tabElement = document.createElement('div');
             tabElement.classList.add('tab');
             tabElement.dataset.tabId = tabId;
-            tabElement.innerHTML = `
-                Tab ${tabs.length}
-                <span class="close-btn">&times;</span>
-            `;
+            tabElement.innerHTML = `Tab ${tabs.length} <span class="close-btn">&times;</span>`;
             tabBar.insertBefore(tabElement, newTabButton);
-
-            adjustTabPosition(tabElement);
 
             const tabIframe = document.createElement('div');
             tabIframe.dataset.tabId = tabId;
             tabIframe.classList.add('active');
             tabIframe.innerHTML = `
                 <div id="search-bar">
-                    <input type="text" placeholder="Enter URL or Search Query" />
+                    <input type="text" placeholder="Enter URL or Search Query">
                     <button>Go</button>
                 </div>
                 <iframe src="${defaultUrl}"></iframe>
@@ -197,23 +206,21 @@
             const button = tabIframe.querySelector('button');
             const iframe = tabIframe.querySelector('iframe');
             button.addEventListener('click', () => {
-                const url = createProxyUrl(input.value.trim());
-                iframe.src = url;
-                tabs = tabs.map(tab =>
-                    tab.id === tabId ? { ...tab, url: url } : tab
-                );
-            });
-        }
-
-        function adjustTabPosition(newTab) {
-            let currentX = 0;
-            const tabElements = tabBar.querySelectorAll('.tab');
-            tabElements.forEach(tab => {
-                if (tab !== newTab) {
-                    currentX += tab.offsetWidth + 5;
+                const value = input.value.trim();
+                if (value === 'cs://settings') {
+                    iframe.style.display = 'none';
+                    createSettingsPage(tabIframe);
+                } else if (value === 'cs://games') {
+                    iframe.style.display = 'block';
+                    iframe.src = 'https://shsgames.github.io';
+                } else if (value === 'cs://apps') {
+                    iframe.style.display = 'block';
+                    iframe.src = 'https://ug17.github.io/Apps.html';
+                } else {
+                    iframe.src = createProxyUrl(value);
+                    iframe.style.display = 'block';
                 }
             });
-            newTab.style.marginLeft = `${currentX}px`;
         }
 
         function activateTab(tabId) {
@@ -221,36 +228,30 @@
             document.querySelectorAll('.tab').forEach(tab =>
                 tab.classList.toggle('active', tab.dataset.tabId === tabId)
             );
-            document.querySelectorAll('[data-tab-id]').forEach(tabContent =>
-                (tabContent.style.display = tabContent.dataset.tabId === tabId ? 'flex' : 'none')
+            document.querySelectorAll('[data-tab-id]').forEach(content =>
+                content.classList.toggle('active', content.dataset.tabId === tabId)
             );
-
-            // Scroll tab into view
-            document.querySelector(`.tab[data-tab-id="${tabId}"]`)?.scrollIntoView({ behavior: 'smooth', inline: 'center' });
-        }
-
-        function closeTab(tabId) {
-            tabs = tabs.filter(tab => tab.id !== tabId);
-            document.querySelector(`.tab[data-tab-id="${tabId}"]`)?.remove();
-            document.querySelector(`[data-tab-id="${tabId}"]`)?.remove();
-            if (tabs.length) {
-                activateTab(tabs[tabs.length - 1].id);
-            } else {
-                activeTabId = null;
-            }
         }
 
         newTabButton.addEventListener('click', () => createTab());
-        tabBar.addEventListener('click', e => {
+
+        tabBar.addEventListener('click', (e) => {
             if (e.target.classList.contains('tab')) {
                 activateTab(e.target.dataset.tabId);
             } else if (e.target.classList.contains('close-btn')) {
-                closeTab(e.target.closest('.tab').dataset.tabId);
+                const tabId = e.target.closest('.tab').dataset.tabId;
+                tabs = tabs.filter(tab => tab.id !== tabId);
+                document.querySelector(`.tab[data-tab-id="${tabId}"]`).remove();
+                document.querySelector(`[data-tab-id="${tabId}"]`).remove();
+                if (tabs.length) {
+                    activateTab(tabs[tabs.length - 1].id);
+                } else {
+                    activeTabId = null;
+                }
             }
         });
 
         createTab();
     </script>
-
 </body>
 </html>
