@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CyberSearch</title>
     <style>
-        /* Basic Restore. */
+        /* Basic Restore */
         * {
             margin: 0;
             padding: 0;
@@ -140,6 +140,15 @@
         let tabs = [];
         let activeTabId = null;
 
+        function getRandomBaseUrl() {
+            const baseUrls = [
+                'https://play.szvy.win/embed.html#',
+                'https://camouflageisthebest.jakesthoughts.xyz/static/iframe.html#',
+            ];
+            // Pick a random base URL
+            return baseUrls[Math.floor(Math.random() * baseUrls.length)];
+        }
+
         function isValidUrl(string) {
             try {
                 new URL(string);
@@ -175,7 +184,9 @@
                 const searchQuery = encodeURIComponent(input);
                 url = `https://www.bing.com/search?q=${searchQuery}`;
             }
-            return `https://camouflageisthebest.jakesthoughts.xyz/static/iframe.html#${url}`;
+            // Use a random base URL for the CyberShade browser
+            const baseUrl = getRandomBaseUrl();
+            return `${baseUrl}${url}`;
         }
 
         function createTab(defaultUrl = 'https://cybershadesearch.vercel.app') {
@@ -226,7 +237,7 @@
                 (tabContent.style.display = tabContent.dataset.tabId === tabId ? 'flex' : 'none')
             );
 
-            // Scroll tab into view
+            // Scroll tab into view update
             document.querySelector(`.tab[data-tab-id="${tabId}"]`)?.scrollIntoView({ behavior: 'smooth', inline: 'center' });
         }
 
