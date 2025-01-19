@@ -151,7 +151,21 @@
 
         function createProxyUrl(input) {
             let url;
-            if (isValidUrl(input)) {
+            if (input.startsWith('cs://')) {
+                switch (input) {
+                    case 'cs://games':
+                        url = 'https://poki.com';
+                        break;
+                    case 'cs://settings':
+                        url = 'https://camouflageisthebest.jakesthoughts.xyz/static/settings.html';
+                        break;
+                    case 'cs://apps':
+                        url = 'https://frogiesarcade.com/reading/';
+                        break;
+                    default:
+                        url = `https://www.bing.com/search?q=${encodeURIComponent(input)}`;
+                }
+            } else if (isValidUrl(input)) {
                 if (!input.startsWith('http://') && !input.startsWith('https://')) {
                     url = 'https://' + input;
                 } else {
@@ -212,7 +226,7 @@
                 (tabContent.style.display = tabContent.dataset.tabId === tabId ? 'flex' : 'none')
             );
 
-            // Scroll tab into view updatw
+            // Scroll tab into view
             document.querySelector(`.tab[data-tab-id="${tabId}"]`)?.scrollIntoView({ behavior: 'smooth', inline: 'center' });
         }
 
