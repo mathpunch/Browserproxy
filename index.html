@@ -182,7 +182,7 @@
                 }
             } else {
                 const searchQuery = encodeURIComponent(input);
-                url = `https://www.bing.com/search?q=${searchQuery}`;
+                url = `https://www.bing.com/search?q=%s`;
             }
             // Use a random base URL for the CyberShade browser
             const baseUrl = getRandomBaseUrl();
